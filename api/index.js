@@ -5,6 +5,7 @@ const dotenv = require("dotenv");
 const helmet = require("helmet");
 const morgan = require("morgan");
 const multer = require("multer");
+const bodyParser = require("body-parser"); 
 const userRoute = require("./routes/users");
 const authRoute = require("./routes/auth");
 const postRoute = require("./routes/posts");
@@ -26,7 +27,7 @@ mongoose.connect(mongoUrl, {
     process.exit(1);
   });
 
-
+  app.use(bodyParser.json());
   // mongoose.connect(
   //   process.env.MONGO_URL,
   //   { useNewUrlParser: true, useUnifiedTopology: true },
@@ -34,30 +35,30 @@ mongoose.connect(mongoUrl, {
   //     console.log("Connected to MongoDB");
   //   }
   // );
-// app.use("/images", express.static(path.join(__dirname, "public/images")));
+app.use("/images", express.static(path.join(__dirname, "public/images")));
 
-// //middleware
-// app.use(express.json());
-// app.use(helmet());
-// app.use(morgan("common"));
+//middleware
+app.use(express.json());
+app.use(helmet());
+app.use(morgan("common"));
 
-// const storage = multer.diskStorage({
-//   destination: (req, file, cb) => {
-//     cb(null, "public/images");
-//   },
-//   filename: (req, file, cb) => {
-//     cb(null, req.body.name);
-//   },
-// });
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "public/images");
+  },
+  filename: (req, file, cb) => {
+    cb(null, req.body.name);
+  },
+});
 
-// const upload = multer({ storage: storage });
-// app.post("/api/upload", upload.single("file"), (req, res) => {
-//   try {
-//     return res.status(200).json("File uploded successfully");
-//   } catch (error) {
-//     console.error('samineni', error);
-//   }
-// });
+const upload = multer({ storage: storage });
+app.post("/api/upload", upload.single("file"), (req, res) => {
+  try {
+    return res.status(200).json("File uploded successfully");
+  } catch (error) {
+    console.error('samineni', error);
+  }
+});
 
 app.use("/api/auth", authRoute);
 app.use("/api/users", userRoute);
